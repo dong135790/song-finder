@@ -48,7 +48,7 @@ function App() {
           <Navigation />
         </Box>
         {/* Middle */}
-        <Box sx={{ width:'55%', minWidth: '600px', height: '90vh' }}>
+        <Box sx={{ width:'70%', minWidth: '600px', height: '90vh' }}>
           <Routes>
             <Route path='/' element={<HomePage discoveryData={discoveryData} />} />
             <Route path='/topartists' element={<TopArtistsPage />} />
@@ -61,7 +61,7 @@ function App() {
             overflowY: 'auto',
             height: '90vh',
             minWidth: '200px',
-            width: '30%'
+            width: '25%'
           }}
         >
           <Stack>
