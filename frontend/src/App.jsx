@@ -43,12 +43,12 @@ function App() {
   return (
     <Box display={'flex'} flexDirection={'column'} height={'90vh'}>
       {/* Left */}
-      <Box display={'flex'} flexDirection={'row'}>
-        <Box sx={{ minWidth: '300px', height: '90vh', bgcolor: '#1d0a27'}}>
+      <Box display={'flex'} flexDirection={'row'} width={'100%'}>
+        <Box sx={{ width: '15%', minWidth: '200px', height: '90vh', bgcolor: '#1d0a27'}}>
           <Navigation />
         </Box>
         {/* Middle */}
-        <Box sx={{ minWidth: '900px', height: '90vh' }}>
+        <Box sx={{ width:'55%', minWidth: '600px', height: '90vh' }}>
           <Routes>
             <Route path='/' element={<HomePage discoveryData={discoveryData} />} />
             <Route path='/topartists' element={<TopArtistsPage />} />
@@ -60,7 +60,8 @@ function App() {
           sx={{
             overflowY: 'auto',
             height: '90vh',
-            minWidth: '300px'
+            minWidth: '200px',
+            width: '30%'
           }}
         >
           <Stack>

@@ -1,12 +1,17 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Box, Stack, Typography, Button } from '@mui/material'
 
 
 const TopCharts = ({ topChartsData }) => {
-    const limitEightTop = topChartsData.slice(0, 6);
+    const [limitData, setLimitData] = useState([])
 
-    if (!topChartsData && limitEightTop) {
+    useEffect(() => {
+        const limitEightTop = topChartsData.slice(0, 6);
+        setLimitData(limitEightTop)
+    }, [topChartsData])
+
+    if (limitData.length == 0) {
         return (
             <Typography>
                 Top charts loading...
@@ -24,7 +29,7 @@ const TopCharts = ({ topChartsData }) => {
                 </Link>
             </Stack>
 
-            {limitEightTop.map((data, index) => (
+            {limitData.map((data, index) => (
                 <Box
                     sx={{
                         height: '12vh',
