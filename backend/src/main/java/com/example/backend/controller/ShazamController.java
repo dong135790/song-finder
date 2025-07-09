@@ -96,4 +96,43 @@ public class ShazamController {
         return ResponseEntity.ok(response.getBody());
     }
 
+    @GetMapping("/search-album-songs")
+    public ResponseEntity<String> searchAlbumSongs(@RequestParam String albumName, @RequestParam String artistName) {
+        String searchQuery = albumName + " " + artistName;
+        String url = "https://shazam-core.p.rapidapi.com/v1/search/multi";
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+            .queryParam("query", searchQuery)
+            .queryParam("search_type", "SONGS_ARTISTS");
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            builder.toUriString(),
+            HttpMethod.GET,
+            getHeaders(),
+            String.class
+        );
+
+        return ResponseEntity.ok(response.getBody());
+    }
+
+
+
+    @GetMapping("/song-details")
+    public ResponseEntity<String> getSongDetails(@RequestParam String trackId) {
+        String url = "https://shazam-core.p.rapidapi.com/v1/tracks/details";
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+            .queryParam("track_id", trackId);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+            builder.toUriString(),
+            HttpMethod.GET,
+            getHeaders(),
+            String.class
+        );
+
+        return ResponseEntity.ok(response.getBody());
+    }
+
+
 }

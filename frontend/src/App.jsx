@@ -17,6 +17,7 @@ function App() {
   const [genre, setGenre] = useState("")
   const [discoveryData, setDiscoveryData] = useState([])
   const [topChartsData, setTopChartsData] = useState([])
+  const [currentSong, setCurrentSong] = useState([])
 
   useEffect(() => {
 
@@ -52,7 +53,7 @@ function App() {
           <Routes>
             <Route path='/' element={<HomePage discoveryData={discoveryData} />} />
             <Route path='/topartists' element={<TopArtistsPage />} />
-            <Route path='/topcharts' element={<TopChartsPage topChartsData={topChartsData} />} />
+            <Route path='/topcharts' element={<TopChartsPage topChartsData={topChartsData} setCurrentSong={setCurrentSong} />} />
           </Routes>
         </Box>
         {/* Right */}
@@ -65,14 +66,14 @@ function App() {
           }}
         >
           <Stack>
-            <TopCharts topChartsData={topChartsData} />
+            <TopCharts topChartsData={topChartsData} setCurrentSong={setCurrentSong} />
             <TopArtists />
           </Stack>
         </Box>
       </Box>
       {/* Bottom */}
       <Box>
-        <SongPlayer />
+        <SongPlayer song={currentSong} />
       </Box>
     </Box>
   )

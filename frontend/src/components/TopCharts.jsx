@@ -3,13 +3,61 @@ import { Link } from 'react-router-dom'
 import { Box, Stack, Typography, Button } from '@mui/material'
 
 
-const TopCharts = ({ topChartsData }) => {
+const TopCharts = ({ topChartsData, setCurrentSong }) => {
     const [limitData, setLimitData] = useState([])
+
+    const filterSongData = async (albumName, artistName) => {
+        console.log(albumName)
+        console.log(artistName)
+        try {
+            let album = albumName.replace(/[()[\]{}-]/g, '').trim()
+            let artist = artistName.replace(/[()[\]{}-]/g, '').trim()
+            const queryAlbum = encodeURIComponent(album)
+            const queryArtist = encodeURIComponent(artist)
+            let finalAlbum = ""
+            let finalArtist = ""
+            if (queryAlbum.length > 25) {
+                let items = queryAlbum.split(/(?=%)/);
+                console.log(items)
+                for (let item of items) {
+                    if ((finalAlbum + item).length <= 20) {
+                        finalAlbum += item;
+                    } else {
+                        continue;
+                    }
+                }
+            } else {
+                finalAlbum = queryAlbum
+            }
+            if (queryArtist.length > 25) {
+                let items = queryArtist.split(/(?=%)/);
+                console.log(items)
+                for (let item of items) {
+                    if ((finalArtist + item).length <= 20) {
+                        finalArtist += item;
+                    } else {
+                        continue;
+                    }
+                }
+            } else {
+                finalArtist = queryArtist
+            }
+
+            const res = await fetch(`http://localhost:8080/api/shazam/search-album-songs?albumName=${finalAlbum}&artistName=${finalArtist}`);
+
+            const data = await res.json();
+            console.log(data.tracks.hits)
+            setCurrentSong(data.tracks.hits[0].track);
+        } catch (error) {
+            console.log("Failed to fetch: " + error)
+        }
+    }
 
     useEffect(() => {
         const limitEightTop = topChartsData.slice(0, 6);
         setLimitData(limitEightTop)
     }, [topChartsData])
+
 
     if (limitData.length == 0) {
         return (
@@ -20,7 +68,7 @@ const TopCharts = ({ topChartsData }) => {
     }
     return (
         <>
-            <Stack direction={'row'} mt={10} display={'flex'} justifyContent={'space-between'}>
+            <Stack direction={'row'} mt={5} display={'flex'} justifyContent={'space-between'}>
                 <Typography sx={{ fontWeight: 800, fontSize: '24px', textAlign: 'center'}}>
                     Top Charts
                 </Typography>
@@ -77,7 +125,10 @@ const TopCharts = ({ topChartsData }) => {
                                 {data.attributes.artistName}
                             </Typography>
                         </Stack>
-                        <Button sx={{ ml: 'auto'}}>
+                        <Button 
+                            sx={{ ml: 'auto'}}
+                            onClick={() => filterSongData(data.attributes.albumName, data.attributes.artistName)}
+                        >
                                 Play
                         </Button>
                     </Stack>
