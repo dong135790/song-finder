@@ -7,7 +7,7 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious';
 
 const SongPlayer = ({ song }) => {
   const songRef = useRef(null)
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [volume, setVolume] = useState(0.5);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -21,10 +21,10 @@ const SongPlayer = ({ song }) => {
 
     const timeUpdate = () => setPosition(audio.currentTime);
     const durationUpdate = () => setDuration(audio.duration);
-
+    
     audio.addEventListener('timeupdate', timeUpdate)
     audio.addEventListener('loadedmetadata', durationUpdate)
-    console.log("Duration: " + duration)
+    audio.play();
 
     return () => {
       audio.removeEventListener('timeupdate', timeUpdate)
