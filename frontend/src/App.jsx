@@ -10,6 +10,7 @@ import SongPlayer from './components/SongPlayer'
 import HomePage from './pages/HomePage'
 import TopArtistsPage from './pages/TopArtistsPage'
 import TopChartsPage from './pages/TopChartsPage'
+import ArtistDetail from './pages/ArtistDetail'
 
 import './App.css'
 
@@ -18,6 +19,7 @@ function App() {
   const [discoveryData, setDiscoveryData] = useState([])
   const [topChartsData, setTopChartsData] = useState([])
   const [currentSong, setCurrentSong] = useState([])
+  const [artistData, setArtistData] = useState([])
 
   useEffect(() => {
 
@@ -34,7 +36,7 @@ function App() {
     const getTopChartData = async () => {
       const res = await fetch("http://localhost:8080/api/shazam/charts");
       const data = await res.json();
-      console.log("Top Charts: ", data);
+      // console.log("Top Charts: ", data);
       setTopChartsData(data);
     }
     // // initialData();
@@ -45,15 +47,21 @@ function App() {
     <Box display={'flex'} flexDirection={'column'} height={'90vh'}>
       {/* Left */}
       <Box display={'flex'} flexDirection={'row'} width={'100%'}>
-        <Box sx={{ width: '15%', minWidth: '200px', height: '90vh', bgcolor: '#1d0a27'}}>
+        <Box sx={{ width: '15%', minWidth: '200px', height: '90vh', bgcolor: '#1d0a27' }}>
           <Navigation />
         </Box>
         {/* Middle */}
-        <Box sx={{ width:'70%', minWidth: '600px', height: '90vh' }}>
+        <Box sx={{
+          width: '70%',
+          minWidth: '600px',
+          height: '90vh',
+          overflowY: 'auto'
+        }}>
           <Routes>
             <Route path='/' element={<HomePage discoveryData={discoveryData} />} />
-            <Route path='/topartists' element={<TopArtistsPage />} />
-            <Route path='/topcharts' element={<TopChartsPage topChartsData={topChartsData} setCurrentSong={setCurrentSong} />} />
+            {/* <Route path='/topartists' element={<TopArtistsPage />} /> */}
+            <Route path='/artist/:artistName' element={<ArtistDetail setCurrentSong={setCurrentSong}/>}/>
+            <Route path='/topcharts' element={<TopChartsPage topChartsData={topChartsData} setCurrentSong={setCurrentSong} setArtistData={setArtistData} />} />
           </Routes>
         </Box>
         {/* Right */}
@@ -67,7 +75,7 @@ function App() {
         >
           <Stack>
             <TopCharts topChartsData={topChartsData} setCurrentSong={setCurrentSong} />
-            <TopArtists />
+            <TopArtists topChartsData={topChartsData} setCurrentSong={setCurrentSong} />
           </Stack>
         </Box>
       </Box>

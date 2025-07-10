@@ -15,11 +15,11 @@ const Navigation = () => {
                         Top Charts
                     </Button>
                 </Link>
-                <Link to='topartists'>
+                {/* <Link to='topartists'>
                     <Button sx={{ textTransform: 'capitalize', fontWeight: 500, fontSize: '20px' }}>
                         Top Artists
                     </Button>
-                </Link>
+                </Link> */}
             </Stack>
         </Box>
     )

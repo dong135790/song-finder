@@ -7,8 +7,8 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
     const [limitData, setLimitData] = useState([])
 
     const filterSongData = async (albumName, artistName) => {
-        console.log(albumName)
-        console.log(artistName)
+        // console.log(albumName)
+        // console.log(artistName)
         try {
             let album = albumName.replace(/[()[\]{}-]/g, '').trim()
             let artist = artistName.replace(/[()[\]{}-]/g, '').trim()
@@ -18,7 +18,6 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
             let finalArtist = ""
             if (queryAlbum.length > 25) {
                 let items = queryAlbum.split(/(?=%)/);
-                console.log(items)
                 for (let item of items) {
                     if ((finalAlbum + item).length <= 20) {
                         finalAlbum += item;
@@ -31,7 +30,6 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
             }
             if (queryArtist.length > 25) {
                 let items = queryArtist.split(/(?=%)/);
-                console.log(items)
                 for (let item of items) {
                     if ((finalArtist + item).length <= 20) {
                         finalArtist += item;
@@ -46,7 +44,7 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
             const res = await fetch(`http://localhost:8080/api/shazam/search-album-songs?albumName=${finalAlbum}&artistName=${finalArtist}`);
 
             const data = await res.json();
-            console.log(data.tracks.hits)
+            // console.log(data.tracks.hits)
             setCurrentSong(data.tracks.hits[0].track);
         } catch (error) {
             console.log("Failed to fetch: " + error)
@@ -54,7 +52,7 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
     }
 
     useEffect(() => {
-        const limitEightTop = topChartsData.slice(0, 6);
+        const limitEightTop = topChartsData.slice(0, 10);
         setLimitData(limitEightTop)
     }, [topChartsData])
 

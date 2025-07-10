@@ -60,7 +60,7 @@ public class ShazamController {
     }
 
     @GetMapping("artist")
-    public ResponseEntity<String> getArtist(@RequestParam String artistId) {
+    public ResponseEntity<String> getArtistById(@RequestParam String artistId) {
 
         String url = "https://shazam-core.p.rapidapi.com/v2/artists/details";
 
@@ -77,6 +77,25 @@ public class ShazamController {
         return ResponseEntity.ok(response.getBody());
 
     }
+
+    // @GetMapping("/search-artist")
+    // public ResponseEntity<String> getArtistByName(@RequestParam String query) {
+        
+    //     String url = "https://shazam-core.p.rapidapi.com/v1/search/multi";
+
+    //     UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+    //             .queryParam("query", query);
+
+    //     ResponseEntity<String> response = restTemplate.exchange(
+    //             builder.toUriString(),
+    //             HttpMethod.GET,
+    //             getHeaders(),
+    //             String.class
+    //     );
+
+    //     return ResponseEntity.ok(response.getBody());
+    // }
+
 
     @GetMapping("/multi-search")
     public ResponseEntity<String> searchMulti(@RequestParam String query) {

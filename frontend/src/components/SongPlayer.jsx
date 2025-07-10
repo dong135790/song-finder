@@ -67,24 +67,26 @@ const SongPlayer = ({ song }) => {
       sx={{
         border: 'solid',
         borderColor: '#fff',
-        height: '20vh'
+        height: '10vh',
+        width: '100vw',
+        overflow: 'hidden',
+        position: 'relative'
       }}
     >
       <audio ref={songRef} src={songUrl} preload='metadata' />
       <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
         {/* Images/songinfo */}
         <Stack direction={'row'} alignItems={'center'}>
-          <Box
-            sx={{
-              width: '100px',
+          <img src={song.images.coverart} alt={song.images.coverart}
+            style={{
+              objectFit: 'cover',
+              width: '90px',
+              height: '90px',
+              marginTop: 5,
+              marginLeft: 15,
+              borderRadius: '50%'
             }}
-          >
-            {/* <img src={song.images.coverart} alt={song.images.coverart}
-              style={{
-                objectFit: 'cover'
-              }}
-            /> */}
-          </Box>
+          />
           <Stack direction={'column'}
             sx={{
               ml: '15px'
@@ -119,15 +121,23 @@ const SongPlayer = ({ song }) => {
             <Typography ml={1}> 0:{Math.floor(duration)} </Typography>
           </Stack>
         </Stack>
-        <Stack>
+        <Stack direction={'column'} alignItems={'center'}>
           {/* Volume */}
+          <Typography
+            sx={{
+              // mt: 5
+              ml: -5
+            }}
+          >
+            Volume
+          </Typography>
           <Slider
             min={0}
             max={1}
             step={0.01}
             value={volume}
             onChange={(e, volume) => setVolume(volume)}
-            sx={{ minWidth: '150px', width: '200px' }}
+            sx={{ minWidth: '150px', width: '200px', mr: 5 }}
           />
         </Stack>
       </Stack>
