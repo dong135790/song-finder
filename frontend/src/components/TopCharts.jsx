@@ -52,10 +52,14 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
     }
 
     useEffect(() => {
-        const limitEightTop = topChartsData.slice(0, 10);
-        setLimitData(limitEightTop)
-    }, [topChartsData])
-
+        if (Array.isArray(topChartsData)) {
+            console.log("Array")
+            const limitEightTop = topChartsData.slice(0, 10);
+            setLimitData(limitEightTop);
+        } else {
+            console.log("topChartsData is not an array:", topChartsData);
+        }
+    }, [topChartsData]);
 
     if (limitData.length == 0) {
         return (
@@ -67,10 +71,10 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
     return (
         <>
             <Stack direction={'row'} mt={5} display={'flex'} justifyContent={'space-between'}>
-                <Typography sx={{ fontWeight: 800, fontSize: '24px', textAlign: 'center'}}>
+                <Typography sx={{ fontWeight: 800, fontSize: '24px', textAlign: 'center' }}>
                     Top Charts
                 </Typography>
-                <Link to='topcharts' sx={{ ml: 'auto'}}>
+                <Link to='topcharts' sx={{ ml: 'auto' }}>
                     <Button>Show more</Button>
                 </Link>
             </Stack>
@@ -94,6 +98,7 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
                         }}
                         gap={1}
                     >
+                        <Typography> {index + 1}. </Typography>
                         <Box
                             sx={{
                                 width: '100px',
@@ -123,11 +128,11 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
                                 {data.attributes.artistName}
                             </Typography>
                         </Stack>
-                        <Button 
-                            sx={{ ml: 'auto'}}
+                        <Button
+                            sx={{ ml: 'auto' }}
                             onClick={() => filterSongData(data.attributes.albumName, data.attributes.artistName)}
                         >
-                                Play
+                            Play
                         </Button>
                     </Stack>
                 </Box >

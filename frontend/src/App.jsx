@@ -15,31 +15,33 @@ import ArtistDetail from './pages/ArtistDetail'
 import './App.css'
 
 function App() {
-  const [genre, setGenre] = useState("")
+  const [genre, setGenre] = useState("classic")
   const [discoveryData, setDiscoveryData] = useState([])
   const [topChartsData, setTopChartsData] = useState([])
   const [currentSong, setCurrentSong] = useState([])
-  const [artistData, setArtistData] = useState([])
 
   useEffect(() => {
-
     // For discovery
-    // const initialData = async () => {
-    //   const res = await fetch("http://localhost:8080/api/shazam/multi-search?query=classic");
-    //   const data = await res.text();
-    //   // console.log(data);
-    //   setGenre('classic');
-    //   setDiscoveryData(data);
-    // }
+    console.log(genre)
+    const initialData = async () => {
+      const res = await fetch(`http://localhost:8080/api/shazam/multi-search?query=${genre}`);
+      // console.log("1")
+      const data = await res.json();
+      // console.log("2")
+      console.log(data);
+      setDiscoveryData(data);
+      // console.log("3")
+    }
+    initialData();
+  }, [genre])
 
+  useEffect(() => {
     // For top Charts
     const getTopChartData = async () => {
       const res = await fetch("http://localhost:8080/api/shazam/charts");
       const data = await res.json();
-      // console.log("Top Charts: ", data);
       setTopChartsData(data);
     }
-    // // initialData();
     getTopChartData();
   }, [])
 
@@ -58,10 +60,10 @@ function App() {
           overflowY: 'auto'
         }}>
           <Routes>
-            <Route path='/' element={<HomePage discoveryData={discoveryData} />} />
+            <Route path='/' element={<HomePage discoveryData={discoveryData} genre={genre} setGenre={setGenre}/>} />
             {/* <Route path='/topartists' element={<TopArtistsPage />} /> */}
             <Route path='/artist/:artistName' element={<ArtistDetail setCurrentSong={setCurrentSong}/>}/>
-            <Route path='/topcharts' element={<TopChartsPage topChartsData={topChartsData} setCurrentSong={setCurrentSong} setArtistData={setArtistData} />} />
+            <Route path='/topcharts' element={<TopChartsPage topChartsData={topChartsData} />} />
           </Routes>
         </Box>
         {/* Right */}

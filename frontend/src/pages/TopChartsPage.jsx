@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Box, Stack, Typography, Button } from '@mui/material'
-const TopChartsPage = ({ topChartsData, setCurrentSong }) => {
+const TopChartsPage = ({ topChartsData }) => {
 
   useEffect(() => {
     console.log(topChartsData)

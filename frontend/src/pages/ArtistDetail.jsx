@@ -5,7 +5,7 @@ import { Typography, Box, Stack, Button } from '@mui/material';
 const ArtistDetail = ({ setCurrentSong }) => {
     const { artistName } = useParams();
     const [artistData, setArtistData] = useState([]);
-    console.log(artistName)
+    // console.log(artistName)
 
     useEffect(() => {
         const getArtistData = async () => {
@@ -27,7 +27,7 @@ const ArtistDetail = ({ setCurrentSong }) => {
             const res = await fetch(`http://localhost:8080/api/shazam/multi-search?query=${finalArtist}`)
             const data = await res.json()
             setArtistData(data);
-            console.log(data)
+            // console.log(data)
         }
         getArtistData();
     }, [artistName])
