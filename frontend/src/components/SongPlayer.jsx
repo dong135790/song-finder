@@ -25,7 +25,7 @@ const SongPlayer = ({ song }) => {
     audio.addEventListener('timeupdate', timeUpdate)
     audio.addEventListener('loadedmetadata', durationUpdate)
     audio.play();
-
+    setIsPlaying(true)
     return () => {
       audio.removeEventListener('timeupdate', timeUpdate)
       audio.removeEventListener('loadedmetadata', durationUpdate)
@@ -69,18 +69,7 @@ const SongPlayer = ({ song }) => {
       }}
     >
       <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
-        {/* Images/songinfo */}
         <Stack direction={'row'} alignItems={'center'}>
-          {/* <img src={song.images.coverart} alt={song.images.coverart}
-            style={{
-              objectFit: 'cover',
-              width: '90px',
-              height: '90px',
-              marginTop: 5,
-              marginLeft: 15,
-              borderRadius: '50%'
-            }}
-          /> */}
           <Stack direction={'column'}
             sx={{
               ml: '15px'
