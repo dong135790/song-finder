@@ -24,7 +24,7 @@ function App() {
     // For discovery
     console.log(genre)
     const initialData = async () => {
-      const res = await fetch(`http://localhost:8080/api/shazam/multi-search?query=${genre}`);
+      const res = await fetch(`https://song-finder-backend-de05213bfcc8.herokuapp.com/api/shazam/multi-search?query=${genre}`);
       // console.log("1")
       const data = await res.json();
       // console.log("2")
@@ -38,7 +38,7 @@ function App() {
   useEffect(() => {
     // For top Charts
     const getTopChartData = async () => {
-      const res = await fetch("http://localhost:8080/api/shazam/charts");
+      const res = await fetch("https://song-finder-backend-de05213bfcc8.herokuapp.com/api/shazam/charts");
       const data = await res.json();
       setTopChartsData(data);
     }

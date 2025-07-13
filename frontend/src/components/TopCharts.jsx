@@ -41,7 +41,7 @@ const TopCharts = ({ topChartsData, setCurrentSong }) => {
                 finalArtist = queryArtist
             }
 
-            const res = await fetch(`http://localhost:8080/api/shazam/search-album-songs?albumName=${finalAlbum}&artistName=${finalArtist}`);
+            const res = await fetch(`https://song-finder-backend-de05213bfcc8.herokuapp.com/api/shazam/search-album-songs?albumName=${finalAlbum}&artistName=${finalArtist}`);
 
             const data = await res.json();
             // console.log(data.tracks.hits)

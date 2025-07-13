@@ -24,7 +24,7 @@ const ArtistDetail = ({ setCurrentSong }) => {
             } else {
                 finalArtist = queryArtist
             }
-            const res = await fetch(`http://localhost:8080/api/shazam/multi-search?query=${finalArtist}`)
+            const res = await fetch(`https://song-finder-backend-de05213bfcc8.herokuapp.com/api/shazam/multi-search?query=${finalArtist}`)
             const data = await res.json()
             setArtistData(data);
             // console.log(data)
