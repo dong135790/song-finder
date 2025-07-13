@@ -23,16 +23,20 @@ function App() {
   useEffect(() => {
     // For discovery
     console.log(genre)
-    const initialData = async () => {
-      const res = await fetch(`https://song-finder-backend-de05213bfcc8.herokuapp.com/api/shazam/multi-search?query=${genre}`);
-      // console.log("1")
-      const data = await res.json();
-      // console.log("2")
-      console.log(data);
-      setDiscoveryData(data);
-      // console.log("3")
-    }
-    initialData();
+    const timer = setTimeout(() => {
+      const initialData = async () => {
+        try {
+          const res = await fetch(`https://song-finder-backend-de05213bfcc8.herokuapp.com/api/shazam/multi-search?query=${genre}`);
+          const data = await res.json();
+          setDiscoveryData(data);
+        } catch (err) {
+          console.error("Discovery fetch failed: ", err)
+        }
+      }
+      initialData();
+
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [genre])
 
   useEffect(() => {
@@ -42,7 +46,7 @@ function App() {
       const data = await res.json();
       setTopChartsData(data);
     }
-    getTopChartData();
+      getTopChartData();
   }, [])
 
   return (
