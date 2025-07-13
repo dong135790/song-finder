@@ -12,7 +12,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**") // Allow all routes
                 .allowedOrigins(
                     "http://localhost:5173",
-                    "https://song-finder-backend-de05213bfcc8.herokuapp.com/"
+                    "https://song-finder-backend-de05213bfcc8.herokuapp.com/",
+                    "https://moonlit-frangollo-a4dc04.netlify.app/"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*");
