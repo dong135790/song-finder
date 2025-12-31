@@ -36,7 +36,7 @@ export const searchShazam = async (req, res) => {
   try {
     const query = (req.query.query || "").toString().trim();
     const type = (req.query.type || "songs").toString().toLowerCase();
-    const offset = Number(req.query.offset ?? 0);
+    const offset = Number(req.query.offset ?? 50);
 
     if (!query) {
       return res.status(400).json({ message: "Missing required query param: query" });

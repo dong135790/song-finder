@@ -63,19 +63,13 @@ const HomePage = ({ setCurrentSong }) => {
 
       const data = await res.json();
 
-      // ✅ RapidAPI search/multi returns results inside data.data
-      const resultsArray = Array.isArray(data?.data) ? data.data : [];
+      const songsArray = Array.isArray(data?.songs) ? data.songs : [];
+      const artistsArray = Array.isArray(data?.artists) ? data.artists : [];
 
       if (type === "artists") {
-        setSearchData({
-          songs: [],
-          artists: resultsArray,
-        });
+        setSearchData({ songs: [], artists: artistsArray });
       } else {
-        setSearchData({
-          songs: resultsArray,
-          artists: [],
-        });
+        setSearchData({ songs: songsArray, artists: [] });
       }
     } catch (e) {
       if (e?.name === "AbortError") return;
