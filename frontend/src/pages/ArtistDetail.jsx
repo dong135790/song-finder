@@ -178,6 +178,7 @@ const ArtistDetail = ({ setCurrentSong }) => {
                     onClick={() => {
                       if (canPlay) setCurrentSong(song);
                     }}
+                    sx={{ color: "white", opacity: canPlay ? 1 : 0.4}}
                     aria-label={`Play ${title}`}
                   >
                     <PlayArrowIcon />
