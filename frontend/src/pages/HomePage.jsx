@@ -17,19 +17,22 @@ const HomePage = ({ setCurrentSong }) => {
   const inFlightRef = useRef(false);
   const abortRef = useRef(null);
 
-  const onSearch = async (query) => {
+  // HomePage.jsx
+  const onSearch = async (query, type = "songs") => {
+    const trimmed = (query || "").trim();
+    if (trimmed.length < 2) return;
+
     const now = Date.now();
 
-    // 1) cooldown (e.g. 1200ms between searches)
+    // cooldown
     if (now - lastSearchAtRef.current < 1200) return;
 
-    // 2) don't fire if a request is already in flight
+    // in flight
     if (inFlightRef.current) return;
 
     lastSearchAtRef.current = now;
     inFlightRef.current = true;
 
-    // cancel any previous request
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -37,16 +40,15 @@ const HomePage = ({ setCurrentSong }) => {
     try {
       setError("");
       setLoading(true);
-      setSearchQuery(query);
+      setSearchQuery(trimmed);
 
       const url = `${API_BASE}/api/shazam/search?query=${encodeURIComponent(
-        query
-      )}&type=both&offset=0`;
+        trimmed
+      )}&type=${encodeURIComponent(type)}&offset=0`;
 
       const res = await fetch(url, { signal: controller.signal });
 
       if (res.status === 429) {
-        // Rate limited (RapidAPI / backend)
         setError("Rate limited (429). Try again in ~30–60 seconds.");
         setSearchData({ songs: [], artists: [] });
         return;
@@ -61,12 +63,22 @@ const HomePage = ({ setCurrentSong }) => {
 
       const data = await res.json();
 
-      setSearchData({
-        songs: Array.isArray(data?.songs) ? data.songs : [],
-        artists: Array.isArray(data?.artists) ? data.artists : [],
-      });
+      // ✅ RapidAPI search/multi returns results inside data.data
+      const resultsArray = Array.isArray(data?.data) ? data.data : [];
+
+      if (type === "artists") {
+        setSearchData({
+          songs: [],
+          artists: resultsArray,
+        });
+      } else {
+        setSearchData({
+          songs: resultsArray,
+          artists: [],
+        });
+      }
     } catch (e) {
-      if (e?.name === "AbortError") return; // user searched again quickly
+      if (e?.name === "AbortError") return;
       console.error("Search failed:", e);
       setError("Search failed. Check console for details.");
       setSearchData({ songs: [], artists: [] });
@@ -75,6 +87,7 @@ const HomePage = ({ setCurrentSong }) => {
       inFlightRef.current = false;
     }
   };
+
 
   return (
     <Box sx={{ p: 3 }}>

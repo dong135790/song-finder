@@ -25,16 +25,12 @@ const simplifyArtist = (item) => {
     url: a?.url ?? null,
   };
 };
+
 /**
- * GET request: Search songs or artists (or both).
+ * GET /api/shazam/search?query=metallica&type=songs|artists|both&offset=0
  *
- * Routes you can wire:
- *   GET /api/shazam/search?query=metallica&type=songs
- *   GET /api/shazam/search?query=metallica&type=artists
- *   GET /api/shazam/search?query=metallica&type=both
- *
- * Optional:
- *   &offset=0
+ * Now `type=both` makes ONE RapidAPI call using search_type=SONGS_ARTISTS
+ * and splits results locally.
  */
 export const searchShazam = async (req, res) => {
   try {
@@ -49,34 +45,39 @@ export const searchShazam = async (req, res) => {
       return res.status(400).json({ message: "offset must be a non-negative number" });
     }
 
-    // RapidAPI only accepts "SONGS" or "ARTISTS"
-    if (type === "both") {
-      const [songsRes, artistsRes] = await Promise.all([
-        shazamClient.get("/v1/search/multi", {
-          params: { query, search_type: "SONGS", offset },
-        }),
-        shazamClient.get("/v1/search/multi", {
-          params: { query, search_type: "ARTISTS", offset },
-        }),
-      ]);
-
-      return res.status(200).json({
-        query,
-        offset,
-        songs: songsRes.data,
-        artists: artistsRes.data,
-      });
-    }
-
-    const search_type = type === "artists" ? "ARTISTS" : "SONGS";
+    // Map to RapidAPI search_type
+    // NOTE: Shazam Core supports SONGS_ARTISTS for the multi search endpoint
+    const search_type =
+      type === "artists" ? "ARTISTS" :
+      type === "both" ? "SONGS_ARTISTS" :
+      "SONGS";
 
     const r = await shazamClient.get("/v1/search/multi", {
       params: { query, search_type, offset },
     });
 
-    return res.status(200).json(r.data);
+    const items = Array.isArray(r?.data?.data) ? r.data.data : [];
+
+    // Split and simplify so frontend gets stable arrays
+    const songs = items
+      .filter((x) => x?.type === "songs")
+      .map(simplifySong)
+      .filter((s) => s?.id && s?.title); // optional cleanup
+
+    const artists = items
+      .filter((x) => x?.type === "artists")
+      .map(simplifyArtist)
+      .filter((a) => a?.id && a?.name); // optional cleanup
+
+    // For type=songs, return only songs; for type=artists, only artists
+    // but keep the same envelope so your frontend never breaks.
+    return res.status(200).json({
+      query,
+      offset,
+      songs: type === "artists" ? [] : songs,
+      artists: type === "songs" ? [] : artists,
+    });
   } catch (err) {
-    // Preserve RapidAPI status codes (e.g., 422)
     const status = err?.response?.status || 500;
     const details = err?.response?.data || err?.message;
 
@@ -88,6 +89,7 @@ export const searchShazam = async (req, res) => {
     });
   }
 };
+
 
 /**
  * GET /api/shazam/top?seed=top%20hits&offset=0

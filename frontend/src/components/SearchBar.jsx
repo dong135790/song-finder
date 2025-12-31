@@ -1,49 +1,57 @@
 import React, { useState } from "react";
-import { Box, TextField, IconButton } from "@mui/material";
+import { Box, IconButton, InputBase, MenuItem, Select } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-const SearchBar = ({ onSearch, placeholder = "Search songs, artists, genres..." }) => {
+export default function SearchBar({ onSearch }) {
   const [value, setValue] = useState("");
+  const [type, setType] = useState("songs"); // songs | artists
 
-  const submit = (e) => {
-    e.preventDefault();
+  const submit = () => {
     const q = value.trim();
     if (!q) return;
-    onSearch(q);
+    onSearch(q, type);
   };
 
   return (
-    <Box component="form" onSubmit={submit} sx={{ display: "flex", gap: 1 }}>
-      <TextField
-        fullWidth
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        placeholder={placeholder}
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 1,
+        p: 1,
+        borderRadius: 2,
+        backgroundColor: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.10)",
+      }}
+    >
+      <Select
+        value={type}
+        onChange={(e) => setType(e.target.value)}
         size="small"
         sx={{
-          input: { color: "white" },
-          "& .MuiOutlinedInput-root": {
-            borderRadius: 2,
-            backgroundColor: "rgba(255,255,255,0.06)",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "rgba(255,255,255,0.15)",
-          },
-        }}
-      />
-      <IconButton
-        type="submit"
-        sx={{
-          borderRadius: 2,
-          backgroundColor: "rgba(255,255,255,0.10)",
           color: "white",
-          "&:hover": { backgroundColor: "rgba(255,255,255,0.16)" },
+          ".MuiOutlinedInput-notchedOutline": { border: "none" },
+          "& .MuiSvgIcon-root": { color: "rgba(255,255,255,0.7)" },
+          minWidth: 140,
         }}
       >
+        <MenuItem value="songs">Songs</MenuItem>
+        <MenuItem value="artists">Artists</MenuItem>
+      </Select>
+
+      <InputBase
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") submit();
+        }}
+        placeholder="Search..."
+        sx={{ flex: 1, color: "white", px: 1 }}
+      />
+
+      <IconButton onClick={submit} sx={{ color: "white" }} aria-label="search">
         <SearchIcon />
       </IconButton>
     </Box>
   );
-};
-
-export default SearchBar;
+}
