@@ -36,7 +36,6 @@ export default function SearchBar({ onSearch }) {
         }}
       >
         <MenuItem value="songs">Songs</MenuItem>
-        <MenuItem value="artists">Artists</MenuItem>
       </Select>
 
       <InputBase
