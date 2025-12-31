@@ -1,17 +1,55 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Typography, IconButton } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 const API_BASE = "https://song-finder-emcn.onrender.com";
 
+/**
+ * ✅ Dedupe + cache across StrictMode effect re-runs
+ * - First call kicks off the fetch
+ * - Duplicate mounts reuse the same promise
+ * - Result is cached
+ */
+let classicPromise = null;
+let classicCache = null;
+
+function getClassic() {
+  if (classicCache) return Promise.resolve(classicCache);
+
+  if (!classicPromise) {
+    classicPromise = fetch(`${API_BASE}/api/shazam/top?seed=classic&offset=0`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const retryAfter = res.headers.get("Retry-After");
+          const text = await res.text().catch(() => "");
+          throw new Error(
+            `Discovery fetch failed (${res.status}).` +
+              (retryAfter ? ` Retry-After: ${retryAfter}s.` : "") +
+              (text ? ` Body: ${text.slice(0, 200)}` : "")
+          );
+        }
+        return res.json();
+      })
+      .then((data) => {
+        classicCache = data; // cache payload
+        return data;
+      })
+      .finally(() => {
+        classicPromise = null;
+      });
+  }
+
+  return classicPromise;
+}
+
 const normalizeSong = (item) => {
   if (!item) return null;
 
-  // clean shape
+  // already normalized (your backend returns title/artworkUrl/etc)
   if (item.title || item.artworkUrl) return item;
 
-  // raw shape
+  // raw apple music shape (just in case)
   const a = item.attributes || {};
   const previewUrl = a?.previews?.[0]?.url || null;
 
@@ -25,61 +63,52 @@ const normalizeSong = (item) => {
   };
 };
 
-const Discovery = ({
-  // from HomePage (search)
+export default function Discovery({
   searchQuery = "",
   searchData = { songs: [], artists: [] },
   loading = false,
   setCurrentSong,
-
-  // optional legacy props
-  genre,
-  setGenre,
-}) => {
+}) {
   const [defaultSongs, setDefaultSongs] = useState([]);
   const [defaultLoading, setDefaultLoading] = useState(true);
+  const [defaultError, setDefaultError] = useState("");
 
-  // if searching, show searched songs; otherwise show default "classic"
   const songsToShow = useMemo(() => {
     if (searchQuery?.trim()) {
       return (Array.isArray(searchData?.songs) ? searchData.songs : [])
         .map(normalizeSong)
         .filter(Boolean);
     }
-    return Array.isArray(defaultSongs) ? defaultSongs : [];
+    return (Array.isArray(defaultSongs) ? defaultSongs : [])
+      .map(normalizeSong)
+      .filter(Boolean);
   }, [searchQuery, searchData, defaultSongs]);
 
-  const hasFetchedRef = useRef(false);
-
-useEffect(() => {
-  if (hasFetchedRef.current) return;
-  hasFetchedRef.current = true;
-
-  const fetchDefault = async () => {
-    // existing fetch code...
-  };
-
-  fetchDefault();
-}, []);
-
   useEffect(() => {
-    const fetchDefault = async () => {
-      try {
-        setDefaultLoading(true);
+    let alive = true;
 
-        // ✅ default seed = classic
-        const res = await fetch(`${API_BASE}/api/shazam/top?seed=classic&offset=0`);
-        const data = await res.json();
+    setDefaultLoading(true);
+    setDefaultError("");
+
+    getClassic()
+      .then((data) => {
+        if (!alive) return;
         setDefaultSongs(Array.isArray(data?.songs) ? data.songs : []);
-      } catch (e) {
+      })
+      .catch((e) => {
+        if (!alive) return;
         console.error("Default discovery fetch failed:", e);
         setDefaultSongs([]);
-      } finally {
+        setDefaultError(e?.message || "Failed to load discovery songs.");
+      })
+      .finally(() => {
+        if (!alive) return;
         setDefaultLoading(false);
-      }
-    };
+      });
 
-    fetchDefault();
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const isLoading = loading || defaultLoading;
@@ -91,11 +120,17 @@ useEffect(() => {
       </Typography>
 
       <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 13, mb: 2 }}>
-        {isLoading ? "Loading..." : `${songsToShow.length} songs`}
+        {isLoading
+          ? "Loading..."
+          : defaultError && !searchQuery?.trim()
+          ? defaultError
+          : `${songsToShow.length} songs`}
       </Typography>
 
       {songsToShow.length === 0 && !isLoading ? (
-        <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>No songs found.</Typography>
+        <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
+          No songs found.
+        </Typography>
       ) : (
         <Box
           sx={{
@@ -121,7 +156,6 @@ useEffect(() => {
                   "&:hover": { backgroundColor: "rgba(255,255,255,0.07)" },
                 }}
               >
-                {/* artwork */}
                 <Box sx={{ position: "relative" }}>
                   <Box
                     component="img"
@@ -135,7 +169,6 @@ useEffect(() => {
                     }}
                   />
 
-                  {/* play button overlay */}
                   <IconButton
                     disabled={!canPlay}
                     onClick={() => {
@@ -156,7 +189,6 @@ useEffect(() => {
                   </IconButton>
                 </Box>
 
-                {/* text */}
                 <Box sx={{ p: 1.5 }}>
                   <Typography sx={{ color: "white", fontWeight: 700 }} noWrap>
                     {title}
@@ -189,6 +221,4 @@ useEffect(() => {
       )}
     </Box>
   );
-};
-
-export default Discovery;
+}
