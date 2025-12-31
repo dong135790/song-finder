@@ -1,143 +1,194 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Box, Stack, Typography, TextField, Button, capitalize } from '@mui/material'
-const Discovery = ({ discoveryData, genre, setGenre }) => {
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import { Box, Typography, IconButton } from "@mui/material";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
-  const [genreType, setGenreType] = useState(genre)
-  const [musicData, setMusicData] = useState([])
-  const [searchInput, setSearchInput] = useState('')
+const API_BASE = "https://song-finder-emcn.onrender.com";
 
-  const GENRES = [
-    'pop', 'hip hop', 'rock', 'country', 'jazz', 'electronic', 'classical', 'blues', 'r&b', 'metal', 'k-pop'
-  ];
+const normalizeSong = (item) => {
+  if (!item) return null;
 
+  // clean shape
+  if (item.title || item.artworkUrl) return item;
 
-  const handleSearch = () => {
-    if (searchInput.trim() !== '') {
-      setGenre(searchInput.trim())
+  // raw shape
+  const a = item.attributes || {};
+  const previewUrl = a?.previews?.[0]?.url || null;
+
+  return {
+    id: item.id ?? null,
+    title: a.name ?? "Unknown Title",
+    artist: a.artistName ?? "Unknown Artist",
+    artworkUrl: a?.artwork?.url ?? "",
+    previewUrl,
+    hasPreview: Boolean(previewUrl),
+  };
+};
+
+const Discovery = ({
+  // from HomePage (search)
+  searchQuery = "",
+  searchData = { songs: [], artists: [] },
+  loading = false,
+  setCurrentSong,
+
+  // optional legacy props
+  genre,
+  setGenre,
+}) => {
+  const [defaultSongs, setDefaultSongs] = useState([]);
+  const [defaultLoading, setDefaultLoading] = useState(true);
+
+  // if searching, show searched songs; otherwise show default "classic"
+  const songsToShow = useMemo(() => {
+    if (searchQuery?.trim()) {
+      return (Array.isArray(searchData?.songs) ? searchData.songs : [])
+        .map(normalizeSong)
+        .filter(Boolean);
     }
-  }
-  useEffect(() => {
-    console.log(discoveryData)
-    setGenreType(genre)
-    setMusicData(discoveryData)
-  }, [discoveryData, genre])
+    return Array.isArray(defaultSongs) ? defaultSongs : [];
+  }, [searchQuery, searchData, defaultSongs]);
 
-  if (!discoveryData || musicData.length == 0) {
-    return (
-      <Typography>Loading...</Typography>
-    )
-  }
+  const hasFetchedRef = useRef(false);
+
+useEffect(() => {
+  if (hasFetchedRef.current) return;
+  hasFetchedRef.current = true;
+
+  const fetchDefault = async () => {
+    // existing fetch code...
+  };
+
+  fetchDefault();
+}, []);
+
+  useEffect(() => {
+    const fetchDefault = async () => {
+      try {
+        setDefaultLoading(true);
+
+        // ✅ default seed = classic
+        const res = await fetch(`${API_BASE}/api/shazam/top?seed=classic&offset=0`);
+        const data = await res.json();
+        setDefaultSongs(Array.isArray(data?.songs) ? data.songs : []);
+      } catch (e) {
+        console.error("Default discovery fetch failed:", e);
+        setDefaultSongs([]);
+      } finally {
+        setDefaultLoading(false);
+      }
+    };
+
+    fetchDefault();
+  }, []);
+
+  const isLoading = loading || defaultLoading;
 
   return (
-    <Box mt={3} ml={3} mr={3} alignItems={'center'}>
-      <Stack direction={'row'} display={'flex'} justifyContent={'center'}>
-        <TextField
-          size="small"
-          placeholder="Search genre or artist"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          sx={{ width: '750px', backgroundColor: '#a982bc', borderRadius: '4px' }}
-        />
-        <Button onClick={handleSearch} variant="contained">
-          <Typography textTransform={'capitalize'}>
-            Search
-          </Typography>
-        </Button>
-      </Stack>
+    <Box sx={{ mt: 2 }}>
+      <Typography variant="h6" sx={{ color: "white", fontWeight: 800, mb: 0.5 }}>
+        {searchQuery?.trim() ? `Results for "${searchQuery}"` : "Discover Classic"}
+      </Typography>
 
+      <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: 13, mb: 2 }}>
+        {isLoading ? "Loading..." : `${songsToShow.length} songs`}
+      </Typography>
 
-      <Box mt={4}>
-        <Stack direction={'row'} display={'flex'} justifyContent={'space-between'}>
-          <Typography 
-            sx={{
-              fontWeight: '600',
-              fontSize: '20px'
-            }}
-          >
-            Discover {genreType} 
-          </Typography>
-          <Box>
-            <select
-              value={genreType}
-              onChange={(e) => {
-                setGenreType(e.target.value)
-                setGenre(e.target.value)
-              }}
-              style={{
-                padding: '6px',
-                borderRadius: '5px',
-                fontSize: '14px'
-              }}
-            >
-              {GENRES.map((genre, index) => (
-                <option key={index} value={genre}>
-                  {genre.charAt(0).toUpperCase() + genre.slice(1)}
-                </option>
-              ))}
-            </select>
-          </Box>
-
-        </Stack>
+      {songsToShow.length === 0 && !isLoading ? (
+        <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>No songs found.</Typography>
+      ) : (
         <Box
           sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
             gap: 2,
-            padding: 2,
-          }}>
-          {musicData.tracks.hits.map((data, index) => (
-            <Box key={index}
-              sx={{
-                border: 'solid',
-                borderColor: '#fff',
-                borderRadius: '20px'
-              }}>
-              <Stack direction={'column'}
-                sx={{
+          }}
+        >
+          {songsToShow.slice(0, 30).map((song, idx) => {
+            const title = song?.title || "Unknown Title";
+            const artist = song?.artist || "Unknown Artist";
+            const artworkUrl = song?.artworkUrl || "";
+            const canPlay = Boolean(song?.previewUrl);
 
+            return (
+              <Box
+                key={song?.id ?? idx}
+                sx={{
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  backgroundColor: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  "&:hover": { backgroundColor: "rgba(255,255,255,0.07)" },
                 }}
               >
-                <img src={data.track?.images?.coverart} alt={data.track?.images?.coverart}
-                  style={{
-                    borderRadius: '20px 20px 0px 0px'
-                  }}
-                />
-
-                <Typography
-                  sx={{
-                    textAlign: 'left',
-                    fontWeight: 700,
-                    fontSize: '14px',
-                    mt: 1,
-                    ml: 2,
-                    mr: 2
-                  }}
-                >
-                  {data.track.title}
-                </Typography>
-                <Link to={`/artist/${data.track.subtitle}`}>
-                  <Typography
+                {/* artwork */}
+                <Box sx={{ position: "relative" }}>
+                  <Box
+                    component="img"
+                    src={artworkUrl}
+                    alt={title}
                     sx={{
-                      textAlign: 'left',
-                      fontWeight: 700,
-                      fontSize: '14px',
-                      mt: 1,
-                      ml: 2,
-                      mr: 2
+                      width: "100%",
+                      height: 180,
+                      objectFit: "cover",
+                      backgroundColor: "rgba(255,255,255,0.08)",
                     }}
+                  />
+
+                  {/* play button overlay */}
+                  <IconButton
+                    disabled={!canPlay}
+                    onClick={() => {
+                      if (canPlay && setCurrentSong) setCurrentSong(song);
+                    }}
+                    sx={{
+                      position: "absolute",
+                      right: 8,
+                      bottom: 8,
+                      backgroundColor: "rgba(0,0,0,0.55)",
+                      color: "white",
+                      opacity: canPlay ? 1 : 0.35,
+                      "&:hover": { backgroundColor: "rgba(0,0,0,0.70)" },
+                    }}
+                    aria-label={`Play ${title}`}
                   >
-                    {data.track.subtitle}
+                    <PlayArrowIcon />
+                  </IconButton>
+                </Box>
+
+                {/* text */}
+                <Box sx={{ p: 1.5 }}>
+                  <Typography sx={{ color: "white", fontWeight: 700 }} noWrap>
+                    {title}
                   </Typography>
-                </Link>
-              </Stack>
-            </Box>
-          ))}
 
+                  <Typography
+                    component={Link}
+                    to={`/artist/${encodeURIComponent(artist)}`}
+                    sx={{
+                      display: "inline-block",
+                      mt: 0.5,
+                      color: "rgba(255,255,255,0.72)",
+                      fontSize: 12,
+                      textDecoration: "none",
+                      "&:hover": { textDecoration: "underline" },
+                    }}
+                    noWrap
+                  >
+                    {artist}
+                  </Typography>
+
+                  <Typography sx={{ mt: 0.75, color: "rgba(255,255,255,0.60)", fontSize: 12 }}>
+                    {canPlay ? "Playable" : "No preview"}
+                  </Typography>
+                </Box>
+              </Box>
+            );
+          })}
         </Box>
-      </Box>
-    </Box >
-  )
-}
+      )}
+    </Box>
+  );
+};
 
-export default Discovery
+export default Discovery;

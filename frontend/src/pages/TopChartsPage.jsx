@@ -1,79 +1,80 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Box, Stack, Typography, Button } from '@mui/material'
-const TopChartsPage = ({ topChartsData }) => {
+import React from "react";
+import { Box, Stack, Typography, Divider } from "@mui/material";
+import { Link } from "react-router-dom";
 
-  useEffect(() => {
-    console.log(topChartsData)
-  }, [topChartsData])
-
-
+const TopChartsPage = ({ topChartsData = [] }) => {
   return (
-    <Box>
-      <Typography textAlign={'center'} mt={8} mb={2}
-        sx={{
-          fontWeight: 600,
-          fontSize: '20px'
-        }}
-      >
-        Top Albums Today
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>
+        Top Charts
       </Typography>
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-          gap: 2,
-          padding: 2,
-        }}>
-        {topChartsData.map((data, index) => (
-          <Box
-            key={index}
-            sx={{
-              border: 'solid',
-              borderColor: '#fff',
-              borderRadius: '20px'
-            }}
 
-          >
-            <Stack direction={'column'} gap={1}>
-              <img src={data.attributes.artwork.url} alt={data.attributes.artwork.url}
-                style={{
-                  borderRadius: '20px 20px 0px 0px'
+      {topChartsData.length === 0 ? (
+        <Typography sx={{ opacity: 0.8 }}>
+          No songs loaded yet.
+        </Typography>
+      ) : (
+        <Stack spacing={1}>
+          {topChartsData.map((song, idx) => (
+            <Box
+              key={song.id || idx}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                p: 1.5,
+                borderRadius: 2,
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.06)" },
+              }}
+            >
+              {/* index */}
+              <Typography sx={{ width: 28, opacity: 0.7 }}>
+                {idx + 1}
+              </Typography>
+
+              {/* artwork */}
+              <Box
+                component="img"
+                src={song.artworkUrl}
+                alt={song.title}
+                sx={{
+                  width: 54,
+                  height: 54,
+                  borderRadius: 2,
+                  objectFit: "cover",
+                  flexShrink: 0,
                 }}
               />
-              <Typography
-                sx={{
-                  textAlign: 'left',
-                  fontWeight: 700,
-                  fontSize: '14px',
-                  mt: 1,
-                  ml: 2,
-                  mr: 2
-                }}
-              >
-                {data.attributes.albumName}
-              </Typography>
-              <Link to={`/artist/${data.attributes.artistName}`}>
-                <Typography
-                  sx={{
-                    textAlign: 'left',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    ml: 2,
-                    mr: 2,
-                    mb: 1
-                  }}
-                >
-                  {data.attributes.artistName}
+
+              {/* title/artist */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography sx={{ fontWeight: 600 }} noWrap>
+                  {song.title}
                 </Typography>
-              </Link>
-            </Stack>
-          </Box>
-        ))}
-      </Box>
+
+                <Typography
+                  sx={{ opacity: 0.8 }}
+                  noWrap
+                  component={Link}
+                  to={`/artist/${encodeURIComponent(song.artist || "")}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  {song.artist}
+                </Typography>
+              </Box>
+
+              {/* preview badge */}
+              <Typography sx={{ opacity: 0.8, fontSize: 12 }}>
+                {song.hasPreview ? "Preview ✅" : "No preview"}
+              </Typography>
+            </Box>
+          ))}
+        </Stack>
+      )}
+
+      <Divider sx={{ mt: 3, opacity: 0.2 }} />
     </Box>
+  );
+};
 
-  )
-}
-
-export default TopChartsPage
+export default TopChartsPage;

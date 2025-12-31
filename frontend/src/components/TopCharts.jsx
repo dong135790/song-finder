@@ -1,144 +1,94 @@
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Box, Stack, Typography, Button } from '@mui/material'
+import React from "react";
+import { Box, Stack, Typography, IconButton } from "@mui/material";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { Link } from "react-router-dom";
 
+const TopCharts = ({ topChartsData = [], setCurrentSong }) => {
+  const songs = Array.isArray(topChartsData) ? topChartsData : [];
 
-const TopCharts = ({ topChartsData, setCurrentSong }) => {
-    const [limitData, setLimitData] = useState([])
+  return (
+    <Box sx={{ p: 2 }}>
+      <Typography variant="h6" sx={{ mb: 1, fontWeight: 700, color: "white" }}>
+        Top Charts
+      </Typography>
 
-    const filterSongData = async (albumName, artistName) => {
-        // console.log(albumName)
-        // console.log(artistName)
-        try {
-            let album = albumName.replace(/[()[\]{}-]/g, '').trim()
-            let artist = artistName.replace(/[()[\]{}-]/g, '').trim()
-            const queryAlbum = encodeURIComponent(album)
-            const queryArtist = encodeURIComponent(artist)
-            let finalAlbum = ""
-            let finalArtist = ""
-            if (queryAlbum.length > 25) {
-                let items = queryAlbum.split(/(?=%)/);
-                for (let item of items) {
-                    if ((finalAlbum + item).length <= 20) {
-                        finalAlbum += item;
-                    } else {
-                        continue;
-                    }
-                }
-            } else {
-                finalAlbum = queryAlbum
-            }
-            if (queryArtist.length > 25) {
-                let items = queryArtist.split(/(?=%)/);
-                for (let item of items) {
-                    if ((finalArtist + item).length <= 20) {
-                        finalArtist += item;
-                    } else {
-                        continue;
-                    }
-                }
-            } else {
-                finalArtist = queryArtist
-            }
+      <Stack spacing={1}>
+        {songs.slice(0, 20).map((song, idx) => {
+          const title = song?.title || "Unknown Title";
+          const artist = song?.artist || "Unknown Artist";
+          const artworkUrl = song?.artworkUrl || "";
+          const canPlay = Boolean(song?.previewUrl);
 
-            const res = await fetch(`https://song-finder-backend-de05213bfcc8.herokuapp.com/api/shazam/search-album-songs?albumName=${finalAlbum}&artistName=${finalArtist}`);
+          return (
+            <Box
+              key={song?.id ?? idx}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                p: 1,
+                borderRadius: 2,
+                opacity: canPlay ? 1 : 0.6,
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.06)" },
+              }}
+            >
+              <Typography sx={{ width: 22, color: "rgba(255,255,255,0.65)" }}>
+                {idx + 1}
+              </Typography>
 
-            const data = await res.json();
-            // console.log(data.tracks.hits)
-            setCurrentSong(data.tracks.hits[0].track);
-        } catch (error) {
-            console.log("Failed to fetch: " + error)
-        }
-    }
+              <Box
+                component="img"
+                src={artworkUrl}
+                alt={title}
+                sx={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 2,
+                  objectFit: "cover",
+                  flexShrink: 0,
+                  backgroundColor: "rgba(255,255,255,0.08)",
+                }}
+              />
 
-    useEffect(() => {
-        if (Array.isArray(topChartsData)) {
-            console.log("Array")
-            const limitEightTop = topChartsData.slice(0, 10);
-            setLimitData(limitEightTop);
-        } else {
-            console.log("topChartsData is not an array:", topChartsData);
-        }
-    }, [topChartsData]);
-
-    if (limitData.length == 0) {
-        return (
-            <Typography>
-                Top charts loading...
-            </Typography>
-        )
-    }
-    return (
-        <>
-            <Stack direction={'row'} mt={5} display={'flex'} justifyContent={'space-between'}>
-                <Typography sx={{ fontWeight: 800, fontSize: '24px', textAlign: 'center' }}>
-                    Top Charts
+              <Box sx={{ minWidth: 0, flex: 1 }}>
+                <Typography sx={{ color: "white", fontWeight: 600 }} noWrap>
+                  {title}
                 </Typography>
-                <Link to='topcharts' sx={{ ml: 'auto' }}>
-                    <Button>Show more</Button>
-                </Link>
-            </Stack>
 
-            {limitData.map((data, index) => (
-                <Box
-                    sx={{
-                        height: '12vh',
-                        display: 'flex',
-                        justifyContent: 'space-evenly',
-                        alignItems: 'center',
-                        overflow: 'hidden'
-                    }}
-                    key={index}
+                {/* ✅ Artist goes to artist page */}
+                <Typography
+                  component={Link}
+                  to={`/artist/${encodeURIComponent(artist)}`}
+                  sx={{
+                    color: "rgba(255,255,255,0.7)",
+                    fontSize: 12,
+                    textDecoration: "none",
+                    "&:hover": { textDecoration: "underline" },
+                  }}
+                  noWrap
                 >
-                    <Stack
-                        direction={'row'}
-                        alignItems={'center'}
-                        sx={{
-                            flex: 1, minWidth: 0, overflow: 'hidden'
-                        }}
-                        gap={1}
-                    >
-                        <Typography> {index + 1}. </Typography>
-                        <Box
-                            sx={{
-                                width: '100px',
-                                height: '80%',
-                                flexShrink: 0,
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                            }}
-                        >
-                            <img
-                                src={data.attributes.artwork.url}
-                                alt={data.attributes.albumName}
-                                loading='lazy'
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover',
-                                    display: 'block',
-                                }}
-                            />
-                        </Box>
-                        <Stack direction={'column'}>
-                            <Typography sx={{ fontWeight: '800', fontSize: '30' }}>
-                                {data.attributes.albumName}
-                            </Typography>
-                            <Typography sx={{ textTransform: 'capitalize' }}>
-                                {data.attributes.artistName}
-                            </Typography>
-                        </Stack>
-                        <Button
-                            sx={{ ml: 'auto' }}
-                            onClick={() => filterSongData(data.attributes.albumName, data.attributes.artistName)}
-                        >
-                            Play
-                        </Button>
-                    </Stack>
-                </Box >
-            ))}
-        </>
-    )
-}
+                  {artist}
+                </Typography>
+              </Box>
 
-export default TopCharts
+              {/* ✅ Only plays if you press play */}
+              <IconButton
+                disabled={!canPlay}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (canPlay) setCurrentSong(song);
+                }}
+                sx={{ color: "white", opacity: canPlay ? 1 : 0.4 }}
+                aria-label={`Play ${title}`}
+              >
+                <PlayArrowIcon />
+              </IconButton>
+            </Box>
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+};
+
+export default TopCharts;
