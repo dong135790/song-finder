@@ -165,10 +165,10 @@ const ArtistDetail = ({ setCurrentSong }) => {
                   />
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontWeight: 700 }} noWrap>
+                    <Typography sx={{ fontWeight: 700, color: "white" }} noWrap>
                       {title}
                     </Typography>
-                    <Typography sx={{ opacity: 0.75, fontSize: 12 }} noWrap>
+                    <Typography sx={{ opacity: 0.75, fontSize: 12, color: "white" }} noWrap>
                       {artist}
                     </Typography>
                   </Box>
